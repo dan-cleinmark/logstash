@@ -215,7 +215,10 @@ class LogStash::Inputs::S3 < LogStash::Inputs::Base
     }
     File.open(filename) do |file|
       if filename.end_with?('.gz')
-        gz = Zlib::GzipReader.new(file)
+        if File.size(filename) < 10000000
+          gz = Zlib::GzipReader.new(file).read
+        else
+          gz = Zlib::GzipReader.new(file)
         gz.each_line do |line|
           metadata = process_line(queue, metadata, line)
         end
